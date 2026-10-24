@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>mTLS Handshake – Animated</title>
+<style>
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+--bg:#f7f9fc;--card:#fff;--text:#1b2433;--muted:#5b6678;--line:#c9d2e0;--client:#2563eb;--server:#059669;--ca:#d97706;--bad:#dc2626}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1420;--card:#171f2e;--text:#e8edf5;--muted:#9aa6ba;--line:#33415a;--client:#60a5fa;--server:#34d399;--ca:#fbbf24;--bad:#f87171}}
+:root[data-theme="dark"]{--bg:#0e1420;--card:#171f2e;--text:#e8edf5;--muted:#9aa6ba;--line:#33415a;--client:#60a5fa;--server:#34d399;--ca:#fbbf24;--bad:#f87171}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:20px 14px}
+.wrap{max-width:860px;margin:0 auto}
+h1{font-size:1.3rem;margin:0 0 4px}
+p.sub{margin:0 0 14px;color:var(--muted);font-size:.9rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px}
+svg{width:100%;height:auto;display:block}
+text{fill:var(--text);font-family:inherit}
+.m{fill:var(--muted)}
+.box{fill:var(--card);stroke-width:2.5}
+.life{stroke:var(--line);stroke-width:2;stroke-dasharray:5 5}
+.pkt{opacity:0;transition:opacity .3s}
+.pkt.on{opacity:1}
+.cap{margin-top:12px;min-height:64px;padding:12px 14px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:.95rem}
+.cap b{display:block;margin-bottom:2px}
+.ctrl{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+button{background:var(--client);color:#fff;border:0;border-radius:8px;padding:8px 14px;font-size:.85rem;cursor:pointer}
+button.alt{background:var(--card);color:var(--text);border:1px solid var(--line)}
+.dots{display:flex;gap:6px;margin-left:auto;align-items:center}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.dot.on{background:var(--client)}
+@keyframes flowR{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+.flow{stroke-dasharray:8 6;animation:flowR .8s linear infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.12)}}
+.pulse{transform-box:fill-box;transform-origin:center;animation:pulse 1s ease-in-out infinite}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>mTLS handshake, step by step</h1>
+<p class="sub">Both sides prove their identity using certificates signed by a shared CA.</p>
+<div class="card">
+<svg viewBox="0 0 800 440" role="img" aria-label="Animated mTLS handshake between client and server with a shared CA">
+  <!-- CA -->
+  <rect class="box" x="325" y="14" width="150" height="50" rx="10" stroke="var(--ca)"/>
+  <text x="400" y="35" text-anchor="middle" font-weight="700" font-size="15">Certificate Authority</text>
+  <text x="400" y="53" text-anchor="middle" class="m" font-size="12">trusted by both</text>
+  <line class="life" x1="400" y1="64" x2="400" y2="96" opacity=".0"/>
+  <!-- endpoints -->
+  <rect class="box" x="60" y="100" width="170" height="54" rx="10" stroke="var(--client)"/>
+  <text x="145" y="124" text-anchor="middle" font-weight="700" font-size="16">Client</text>
+  <text x="145" y="143" text-anchor="middle" class="m" font-size="12">cert: CN=alice</text>
+  <rect class="box" x="570" y="100" width="170" height="54" rx="10" stroke="var(--server)"/>
+  <text x="655" y="124" text-anchor="middle" font-weight="700" font-size="16">Server</text>
+  <text x="655" y="143" text-anchor="middle" class="m" font-size="12">cert: CN=localhost</text>
+  <line class="life" x1="145" y1="154" x2="145" y2="425"/>
+  <line class="life" x1="655" y1="154" x2="655" y2="425"/>
+  <!-- CA trust links -->
+  <path id="t1" d="M325 40 H145 V100" fill="none" stroke="var(--ca)" stroke-width="2" stroke-dasharray="4 5" opacity=".6"/>
+  <path id="t2" d="M475 40 H655 V100" fill="none" stroke="var(--ca)" stroke-width="2" stroke-dasharray="4 5" opacity=".6"/>
+
+  <!-- steps -->
+  <g class="pkt" id="s1"><line class="flow" x1="145" y1="195" x2="640" y2="195" stroke="var(--client)" stroke-width="3"/><polygon points="655,195 640,188 640,202" fill="var(--client)"/><text x="400" y="186" text-anchor="middle" font-size="14">1  ClientHello</text></g>
+  <g class="pkt" id="s2"><line class="flow" x1="655" y1="245" x2="160" y2="245" stroke="var(--server)" stroke-width="3"/><polygon points="145,245 160,238 160,252" fill="var(--server)"/><text x="400" y="236" text-anchor="middle" font-size="14">2  ServerHello + server certificate</text></g>
+  <g class="pkt" id="s3"><circle class="pulse" cx="145" cy="282" r="13" fill="none" stroke="var(--server)" stroke-width="3"/><path d="M139 282 l5 6 l9 -11" fill="none" stroke="var(--server)" stroke-width="3"/><text x="170" y="287" font-size="13">3  Client verifies server cert against CA</text></g>
+  <g class="pkt" id="s4"><line class="flow" x1="655" y1="320" x2="160" y2="320" stroke="var(--ca)" stroke-width="3"/><polygon points="145,320 160,313 160,327" fill="var(--ca)"/><text x="400" y="311" text-anchor="middle" font-size="14">4  "Please send YOUR certificate"</text></g>
+  <g class="pkt" id="s5"><line class="flow" x1="145" y1="356" x2="640" y2="356" stroke="var(--client)" stroke-width="3"/><polygon points="655,356 640,349 640,363" fill="var(--client)"/><text x="400" y="347" text-anchor="middle" font-size="14">5  Client cert + proof of private key</text></g>
+  <g class="pkt" id="s6"><circle class="pulse" cx="655" cy="388" r="13" fill="none" stroke="var(--client)" stroke-width="3"/><path d="M649 388 l5 6 l9 -11" fill="none" stroke="var(--client)" stroke-width="3"/><text x="630" y="393" text-anchor="end" font-size="13">6  Server verifies client cert against CA</text></g>
+  <g class="pkt" id="s7"><rect x="145" y="403" width="510" height="22" rx="11" fill="var(--server)" opacity=".18"/><line class="flow" x1="160" y1="414" x2="640" y2="414" stroke="var(--server)" stroke-width="4"/><text x="400" y="418" text-anchor="middle" font-size="13" font-weight="700">7  Encrypted traffic both ways</text></g>
+</svg>
+</div>
+<div class="cap" id="cap"></div>
+<div class="ctrl">
+  <button id="play">Pause</button>
+  <button class="alt" id="prev">Back</button>
+  <button class="alt" id="next">Next</button>
+  <div class="dots" id="dots"></div>
+</div>
+</div>
+<script>
+var T=[
+["Start","The client opens a connection to the server."],
+["ClientHello","The client announces the TLS versions and ciphers it supports."],
+["Server proves itself","The server sends its certificate, signed by the CA."],
+["Client checks the server","The client validates the signature using the CA certificate it trusts."],
+["The mTLS twist","The server asks the client for a certificate too."],
+["Client proves itself","The client sends its certificate and signs a challenge with its private key."],
+["Server checks the client","The server validates the client certificate against the same CA. Name alone is not enough; the signature must be valid."],
+["Secure channel","Both identities are confirmed. Session keys are derived and traffic is encrypted."]
+];
+var i=0,playing=true,timer,cap=document.getElementById('cap'),dots=document.getElementById('dots');
+T.forEach(function(){var d=document.createElement('div');d.className='dot';dots.appendChild(d)});
+function show(n){
+  i=(n+T.length)%T.length;
+  for(var k=1;k<=7;k++){document.getElementById('s'+k).classList.toggle('on',k<=i)}
+  cap.innerHTML='<b>'+(i?i+'. ':'')+T[i][0]+'</b>'+T[i][1];
+  Array.prototype.forEach.call(dots.children,function(d,k){d.classList.toggle('on',k===i)});
+}
+function tick(){clearTimeout(timer);if(playing)timer=setTimeout(function(){show(i+1);tick()},i===7?3200:1900)}
+document.getElementById('play').onclick=function(){playing=!playing;this.textContent=playing?'Pause':'Play';tick()};
+document.getElementById('next').onclick=function(){show(i+1);tick()};
+document.getElementById('prev').onclick=function(){show(i-1);tick()};
+show(0);tick();
+</script>
+</body>
+</html>
